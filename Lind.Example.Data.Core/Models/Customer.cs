@@ -27,9 +27,9 @@ public partial class Customer : ExampleEntity
 
     public string? Phone { get; set; }
 
-    public string PasswordHash { get; set; } = null!;
+    public string? PasswordHash { get; set; } = null!;
 
-    public string PasswordSalt { get; set; } = null!;
+    public string? PasswordSalt { get; set; } = null!;
 
     public virtual ICollection<CustomerAddress> CustomerAddresses { get; set; } = new List<CustomerAddress>();
 
