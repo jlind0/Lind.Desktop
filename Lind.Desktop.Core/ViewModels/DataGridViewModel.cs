@@ -18,6 +18,12 @@ namespace Lind.Desktop.Core.ViewModels
         where TEntity: ExampleEntity, new()
         where TViewModel: GridDetailViewModel<TRepositoryClient, TEntity>
     {
+        private bool isLoading = false;
+        public bool IsLoading
+        {
+            get => isLoading;
+            set => SetProperty(ref isLoading, value);
+        }
         private int pageSize = 20;
         public int PageSize
         {
@@ -34,7 +40,12 @@ namespace Lind.Desktop.Core.ViewModels
         public int Pages
         {
             get => pages;
-            set => SetProperty(ref pages, value);
+            set 
+            { 
+                SetProperty(ref pages, value);
+                OnPropertyChanged(nameof(CanPageDown));
+                OnPropertyChanged(nameof(CanPageUp));
+            }
         }
         private int count = 0;
         public int Count
@@ -47,16 +58,49 @@ namespace Lind.Desktop.Core.ViewModels
         { get; }
         public ObservableCollection<TViewModel> Data { get; } = new ObservableCollection<TViewModel>();
         public IAsyncRelayCommand LoadCommand { get; }
-        public IAsyncRelayCommand<int> ChangePageSizeCommand { get; }
-        public IAsyncRelayCommand<int> NavigateToPageCommand { get; }
         public IAsyncRelayCommand DeleteManyCommand { get; }
+        public IAsyncRelayCommand PageUpCommand { get; }
+        public bool CanPageUp
+        {
+            get => Page < Pages;
+        }
+        public bool CanPageDown
+        {
+            get => Page > 1;
+        }
+        public IAsyncRelayCommand PageDownCommand { get; }
+        public IAsyncRelayCommand PageSizeChangedCommand { get; }
         public DataGridViewModel(TRepositoryClient customerRepository)
         {
             Repository = customerRepository;
             LoadCommand = new AsyncRelayCommand(Load);
-            ChangePageSizeCommand = new AsyncRelayCommand<int>(ChangePageSize);
-            NavigateToPageCommand = new AsyncRelayCommand<int>(NavigateToPage);
             DeleteManyCommand = new AsyncRelayCommand(DeleteMany);
+            PageUpCommand = new AsyncRelayCommand(PageUp);
+            PageDownCommand = new AsyncRelayCommand(PageDown);
+            PageSizeChangedCommand = new AsyncRelayCommand(PageSizeChanged);
+        }
+        protected Task PageSizeChanged(CancellationToken token = default)
+        {
+            Page = 1;
+            return Load(token);
+        }
+        protected Task PageUp(CancellationToken token = default)
+        {
+            if (CanPageUp)
+            {
+                Page++;
+                return Load(token);
+            }
+            return Task.CompletedTask;
+        }
+        protected Task PageDown(CancellationToken token = default)
+        {
+            if (CanPageDown)
+            {
+                Page--;
+                return Load(token);
+            }
+            return Task.CompletedTask;
         }
         protected virtual async Task DeleteMany(CancellationToken token)
         {
@@ -67,24 +111,11 @@ namespace Lind.Desktop.Core.ViewModels
                 await Load(token);
             }
         }
-        protected virtual Task NavigateToPage(int page, CancellationToken token)
-        {
-            if (page <= Pages)
-            {
-                Page = page;
-                return Load(token);
-            }
-            return Task.CompletedTask;
-        }
-        protected virtual Task ChangePageSize(int size, CancellationToken token)
-        {
-            PageSize = size;
-            return Load(token);
-        }
         protected abstract OrderBy[] GetSort();
         protected abstract TViewModel GetDetailViewModel(TEntity entity);
         protected virtual async Task Load(CancellationToken token)
         {
+            isLoading = true;
             Data.Clear();
             var result = await Repository.GetAll(
                 new Pager() { Length = PageSize, Page = Page },
@@ -100,6 +131,7 @@ namespace Lind.Desktop.Core.ViewModels
                     Data.Add(GetDetailViewModel(r));
                 }
             }
+            isLoading = false;
         }
     }
     public abstract class GridDetailViewModel<TRepositoryClient, TEntity> : ObservableObject

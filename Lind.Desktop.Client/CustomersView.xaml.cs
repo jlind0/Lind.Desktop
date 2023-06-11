@@ -18,9 +18,9 @@ namespace Lind.Desktop.Client
     /// <summary>
     /// Interaction logic for CustomerView.xaml
     /// </summary>
-    public partial class CustomerView : UserControl
+    public partial class CustomersView : UserControl
     {
-        public CustomerView()
+        public CustomersView()
         {
             InitializeComponent();
         }

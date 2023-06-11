@@ -27,6 +27,12 @@ namespace Lind.Desktop.Core.ViewModels
             get => canOpenCustomers;
             set => SetProperty(ref canOpenCustomers, value);
         }
+        private int? selectedTabIndex;
+        public int? SelectedTabIndex
+        {
+            get => selectedTabIndex;
+            set => SetProperty(ref selectedTabIndex, value);
+        }
         protected IRepositoryClient<Customer> CustomersClient
             { get;  }
         
@@ -45,6 +51,7 @@ namespace Lind.Desktop.Core.ViewModels
                     CanOpenCustomers = true;
                 tabViewModel.Dispose();
             }
+            SelectedTabIndex = Tabs.Count > 0 ? Tabs.Count - 1 : null;
         }
         public void OpenCustomersTab()
         {
@@ -52,6 +59,7 @@ namespace Lind.Desktop.Core.ViewModels
             {
                 Tabs.Add(new CustomerTabViewModel(CustomersClient));
                 canOpenCustomers = false;
+                SelectedTabIndex = Tabs.Count - 1;
             }
         }
     }

@@ -1,0 +1,55 @@
+﻿<UserControl x:Class="Lind.Desktop.Client.CustomersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:local="clr-namespace:Lind.Desktop.Client"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    
+    <DockPanel DataContext="{Binding CustomerGrid}">
+        <b:Interaction.Triggers>
+            <b:EventTrigger EventName="Loaded">
+                <b:InvokeCommandAction Command="{Binding LoadCommand}"/>
+            </b:EventTrigger>
+        </b:Interaction.Triggers>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <Button Command="{Binding LoadCommand}">Load</Button>
+            <Button Command="{Binding DeleteManyCommand}">Delete</Button>
+        </StackPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Label>Page Count:</Label>
+                <Label Content="{Binding Pages}"/>
+                <Label>Page Size:</Label>
+                <ComboBox SelectedValue="{Binding PageSize}" ItemsSource="{Binding PageOptions}">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="SelectionChanged">
+                            <b:InvokeCommandAction Command="{Binding PageSizeChangedCommand}"/>
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                <Button Command="{Binding PageDownCommand}" Content="Previous">
+                    
+                </Button>
+                <Button Command="{Binding PageUpCommand}" Content="Next"></Button>
+                <Label>Current Page:</Label>
+                <Label Content="{Binding Page}"/>
+            </StackPanel>
+            
+        </DockPanel>
+
+        <DataGrid ItemsSource="{Binding Data}" AutoGenerateColumns="False">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding FirstName}" Header="First Name"/>
+                <DataGridTextColumn Binding="{Binding LastName}" Header="Last Name"/>
+                <DataGridCheckBoxColumn Binding="{Binding IsChecked}" Header="Select"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </DockPanel>
+</UserControl>

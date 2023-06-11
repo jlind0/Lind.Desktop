@@ -6,10 +6,10 @@
         xmlns:local="clr-namespace:Lind.Desktop.Client"
         xmlns:ds="clr-namespace:Lind.Desktop.Client.DataTemplateSelectors"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Lindian Example (Adventure Works)" Height="450" Width="800">
     <Window.Resources>
         <DataTemplate x:Key="CustomerTabTemplate">
-            <local:CustomerView />
+            <local:CustomersView />
         </DataTemplate>
         <ds:RepositorySelector x:Key="RepositorySelector" 
             Customer="{StaticResource CustomerTabTemplate}"/>
@@ -21,10 +21,12 @@
                     <Image DockPanel.Dock="Left" Source="/Images/Customers.png" Width="30"/>
                     <Label DockPanel.Dock="Right">Customers</Label>
                 </DockPanel>
+                
             </Button>
             
         </StackPanel>
-        <TabControl ItemsSource="{Binding Tabs}" ContentTemplateSelector="{StaticResource RepositorySelector}">
+        <TabControl SelectedIndex="{Binding SelectedTabIndex}" 
+                    ItemsSource="{Binding Tabs}" ContentTemplateSelector="{StaticResource RepositorySelector}">
             <TabControl.ItemTemplate>
                 <DataTemplate>
                     <DockPanel LastChildFill="True">
