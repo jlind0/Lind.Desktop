@@ -21,6 +21,8 @@ namespace Lind.Desktop.Core.ViewModels
         public ObservableCollection<TabViewModel> Tabs { get; } = new ObservableCollection<TabViewModel>();
         public IRelayCommand<TabViewModel> CloseTabCommand{ get; }
         public IRelayCommand OpenCustomersTabCommand { get; }
+        public IAsyncRelayCommand<int> OpenCustomerDetailCommand { get; }
+        public IRelayCommand OpenCustomerAddCommand { get; }
         private bool canOpenCustomers = true;
         public bool CanOpenCustomers
         {
@@ -41,6 +43,18 @@ namespace Lind.Desktop.Core.ViewModels
             CustomersClient = customersClient;
             CloseTabCommand = new RelayCommand<TabViewModel>(CloseTab);
             OpenCustomersTabCommand = new RelayCommand(OpenCustomersTab);
+            OpenCustomerDetailCommand = new AsyncRelayCommand<int>(OpenCustomerDetail);
+            OpenCustomerAddCommand = new RelayCommand(OpenCustomerAdd);
+        }
+        public async Task OpenCustomerDetail(int customerId, CancellationToken token = default)
+        {
+            var customer = await CustomersClient.Get(customerId, token);
+            Tabs.Add(new CustomerDetailTabViewModel(CustomersClient, customer));
+
+        }
+        public void OpenCustomerAdd()
+        {
+            Tabs.Add(new CustomerDetailTabViewModel(CustomersClient));
         }
         protected void CloseTab(TabViewModel? tabViewModel)
         {

@@ -136,7 +136,7 @@ namespace Lind.Example.Data
                 TEntity? entity = await w.Context.FindAsync<TEntity>(ids, token);
                 if (entity != null)
                     await Delete(entity, w, t);
-            }, work, token, false);
+            }, work, token, true);
             
         }
         public virtual Task Delete(TEntity entity, UnitOfWork? work = null, CancellationToken token = default)

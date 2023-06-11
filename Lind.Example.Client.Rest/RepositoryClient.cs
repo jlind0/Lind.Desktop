@@ -67,7 +67,7 @@ namespace Lind.Example.Client.Rest
                 var url = $"{repositoryName}/";
                 var response = await client.PostAsJsonAsync(url, entity, token);
                 if (response.IsSuccessStatusCode)
-                    entity = await response.Content.ReadAsAsync<TEntity>();
+                    entity = await response.Content.ReadAsAsync<TEntity>(token);
             }
             return entity;
         }

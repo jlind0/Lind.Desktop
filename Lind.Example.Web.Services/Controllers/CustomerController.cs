@@ -34,7 +34,7 @@ namespace Lind.Example.Web.Services.Controllers
                     Page = page,
                     Length = pageSize
                 };
-                Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderClause = null;
+                Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderClause = null;
                 if(orderBy != null)
                 {
                     var orderData = orderBy.Split(',').Select(x => x.Split(':')).Select(x => new { ColumnName = x[0], Dsc = x[1].ToLower() == "dsc" });

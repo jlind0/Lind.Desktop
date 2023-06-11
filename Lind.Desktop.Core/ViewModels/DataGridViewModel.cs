@@ -18,6 +18,12 @@ namespace Lind.Desktop.Core.ViewModels
         where TEntity: ExampleEntity, new()
         where TViewModel: GridDetailViewModel<TRepositoryClient, TEntity>
     {
+        private bool isLoaded = false;
+        public bool IsLoaded
+        {
+            get => isLoaded;
+            set => SetProperty(ref isLoaded, value);
+        }
         private bool isLoading = false;
         public bool IsLoading
         {
@@ -58,6 +64,7 @@ namespace Lind.Desktop.Core.ViewModels
         { get; }
         public ObservableCollection<TViewModel> Data { get; } = new ObservableCollection<TViewModel>();
         public IAsyncRelayCommand LoadCommand { get; }
+        public IAsyncRelayCommand FirstLoadCommand { get; }
         public IAsyncRelayCommand DeleteManyCommand { get; }
         public IAsyncRelayCommand PageUpCommand { get; }
         public bool CanPageUp
@@ -78,13 +85,22 @@ namespace Lind.Desktop.Core.ViewModels
             PageUpCommand = new AsyncRelayCommand(PageUp);
             PageDownCommand = new AsyncRelayCommand(PageDown);
             PageSizeChangedCommand = new AsyncRelayCommand(PageSizeChanged);
+            FirstLoadCommand = new AsyncRelayCommand(FirstLoad);
         }
-        protected Task PageSizeChanged(CancellationToken token = default)
+        protected virtual async Task FirstLoad(CancellationToken token = default)
+        {
+            if(!IsLoaded)
+            {
+                await Load(token);
+                IsLoaded = true;
+            }
+        }
+        protected virtual Task PageSizeChanged(CancellationToken token = default)
         {
             Page = 1;
             return Load(token);
         }
-        protected Task PageUp(CancellationToken token = default)
+        protected virtual Task PageUp(CancellationToken token = default)
         {
             if (CanPageUp)
             {
@@ -93,7 +109,7 @@ namespace Lind.Desktop.Core.ViewModels
             }
             return Task.CompletedTask;
         }
-        protected Task PageDown(CancellationToken token = default)
+        protected virtual Task PageDown(CancellationToken token = default)
         {
             if (CanPageDown)
             {
@@ -115,7 +131,7 @@ namespace Lind.Desktop.Core.ViewModels
         protected abstract TViewModel GetDetailViewModel(TEntity entity);
         protected virtual async Task Load(CancellationToken token)
         {
-            isLoading = true;
+            IsLoading = true;
             Data.Clear();
             var result = await Repository.GetAll(
                 new Pager() { Length = PageSize, Page = Page },
@@ -131,7 +147,7 @@ namespace Lind.Desktop.Core.ViewModels
                     Data.Add(GetDetailViewModel(r));
                 }
             }
-            isLoading = false;
+            IsLoading = false;
         }
     }
     public abstract class GridDetailViewModel<TRepositoryClient, TEntity> : ObservableObject

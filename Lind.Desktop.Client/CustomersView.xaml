@@ -11,13 +11,19 @@
     <DockPanel DataContext="{Binding CustomerGrid}">
         <b:Interaction.Triggers>
             <b:EventTrigger EventName="Loaded">
-                <b:InvokeCommandAction Command="{Binding LoadCommand}"/>
+                <b:InvokeCommandAction Command="{Binding FirstLoadCommand}"/>
             </b:EventTrigger>
         </b:Interaction.Triggers>
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-            <Button Command="{Binding LoadCommand}">Load</Button>
-            <Button Command="{Binding DeleteManyCommand}">Delete</Button>
-        </StackPanel>
+        <DockPanel DockPanel.Dock="Top" >
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                <Button Command="{Binding LoadCommand}">Load</Button>
+                <Button Command="{Binding DeleteManyCommand}">Delete</Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                <Button DockPanel.Dock="Right" Content="Add" Command="{Binding DataContext.OpenCustomerAddCommand, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
+            </StackPanel>
+           
+        </DockPanel>
         <DockPanel DockPanel.Dock="Bottom">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <Label>Page Count:</Label>
@@ -42,12 +48,33 @@
             
         </DockPanel>
 
-        <DataGrid ItemsSource="{Binding Data}" AutoGenerateColumns="False">
+        <DataGrid ItemsSource="{Binding Data}" AutoGenerateColumns="False" CanUserAddRows="False">
+            <DataGrid.RowStyle>
 
+                <Style TargetType="{x:Type DataGridRow}">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver"
+                           Value="True">
+                            <Setter Property="Background"
+                               Value="LightBlue" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+            <DataGrid.InputBindings>
+            <MouseBinding MouseAction="LeftDoubleClick" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=SelectedItem.CustomerId}"
+                          Command="{Binding DataContext.OpenCustomerDetailCommand, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"/>
+            </DataGrid.InputBindings>
+            <b:Interaction.Triggers>
+                <b:EventTrigger EventName="SelectionChanged">
+                    <b:InvokeCommandAction CommandParameter="{Binding CustomerId}" 
+                        Command=""/>
+                </b:EventTrigger>
+            </b:Interaction.Triggers>
             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding FirstName}" Header="First Name"/>
-                <DataGridTextColumn Binding="{Binding LastName}" Header="Last Name"/>
-                <DataGridCheckBoxColumn Binding="{Binding IsChecked}" Header="Select"/>
+                <DataGridTextColumn IsReadOnly="True" Binding="{Binding FirstName}" Header="First Name"/>
+                <DataGridTextColumn  IsReadOnly="True" Binding="{Binding LastName}" Header="Last Name"/>
+                <DataGridCheckBoxColumn IsReadOnly="True" Binding="{Binding IsChecked}" Header="Select"/>
             </DataGrid.Columns>
         </DataGrid>
 

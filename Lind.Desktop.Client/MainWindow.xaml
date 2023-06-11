@@ -11,8 +11,11 @@
         <DataTemplate x:Key="CustomerTabTemplate">
             <local:CustomersView />
         </DataTemplate>
+        <DataTemplate x:Key="CustomerDetailTabTemplate">
+            <local:CustomerDetailView />
+        </DataTemplate>
         <ds:RepositorySelector x:Key="RepositorySelector" 
-            Customer="{StaticResource CustomerTabTemplate}"/>
+            Customer="{StaticResource CustomerTabTemplate}" CustomerDetail="{StaticResource CustomerDetailTabTemplate}"/>
     </Window.Resources>
     <DockPanel>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
@@ -39,7 +42,7 @@
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-                        <Label DockPanel.Dock="Left" Content="{Binding Title}"/>
+                        <Label DockPanel.Dock="Left" Content="{Binding TabTitle}"/>
                     </DockPanel>
                 </DataTemplate>
             </TabControl.ItemTemplate>
