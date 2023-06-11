@@ -33,7 +33,6 @@ namespace Lind.Desktop.Client
             services.AddSingleton<IHttpClientFactory>(sp => new RepositoryHttpClientFactory(new Uri(ConfigurationManager.AppSettings["ApiUri"])));
             services.AddScoped<IRepositoryClient<Customer>, RepositoryClient<Customer>>();
             services.AddTransient<MainWindowViewModel>();
-            services.AddTransient<CustomerViewModel>();
             return services.BuildServiceProvider();
         }
     }

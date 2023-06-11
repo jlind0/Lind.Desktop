@@ -4,11 +4,26 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Lind.Desktop.Client"
-             mc:Ignorable="d">
-    <StackPanel Orientation="Horizontal">
-        <Label>Last Name:</Label>
-        <Label Content="{Binding LastName}"></Label>
-        <Label>First Name:</Label>
-        <Label Content="{Binding FirstName}"></Label>
-    </StackPanel>
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <DockPanel DataContext="{Binding CustomerGrid}">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+            <Label>Page Count:</Label>
+            <Label Content="{Binding Pages}"/>
+            <Label>Page Size:</Label>
+            <ComboBox SelectedValue="{Binding PageSize}" ItemsSource="{Binding PageOptions}"/>
+            <Button Command="{Binding LoadCommand}">Load</Button>
+            <Button Command="{Binding DeleteManyCommand}">Delete</Button>
+        </StackPanel>
+
+        <DataGrid MaxHeight="360" ItemsSource="{Binding Data}" AutoGenerateColumns="False">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding FirstName}" Header="First Name"/>
+                <DataGridTextColumn Binding="{Binding LastName}" Header="Last Name"/>
+                <DataGridCheckBoxColumn Binding="{Binding IsChecked}" Header="Select"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+    </DockPanel>
 </UserControl>

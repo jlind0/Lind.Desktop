@@ -4,25 +4,45 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Lind.Desktop.Client"
+        xmlns:ds="clr-namespace:Lind.Desktop.Client.DataTemplateSelectors"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <Label>Page Count:</Label>
-            <Label Content="{Binding Pages}"/>
-            <Label>Page Size:</Label>
-            <TextBox Text="{Binding PageSize}"/>
-            <Button Command="{Binding LoadCustomersCommand}">Load</Button>
-            <Button Command="{Binding DeleteCustomersCommand}">Delete</Button>
+    <Window.Resources>
+        <DataTemplate x:Key="CustomerTabTemplate">
+            <local:CustomerView />
+        </DataTemplate>
+        <ds:RepositorySelector x:Key="RepositorySelector" 
+            Customer="{StaticResource CustomerTabTemplate}"/>
+    </Window.Resources>
+    <DockPanel>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+            <Button Command="{Binding OpenCustomersTabCommand}" IsEnabled="{Binding CanOpenCustomers}">
+                <DockPanel>
+                    <Image DockPanel.Dock="Left" Source="Images/Customers.png" Width="30"/>
+                    <Label DockPanel.Dock="Right">Customers</Label>
+                </DockPanel>
+            </Button>
+            
         </StackPanel>
-        <DataGrid MaxHeight="360" ItemsSource="{Binding Customers}" AutoGenerateColumns="False">
-           
-            <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding FirstName}" Header="First Name"/>
-                <DataGridTextColumn Binding="{Binding LastName}" Header="Last Name"/>
-                <DataGridCheckBoxColumn Binding="{Binding IsChecked}" Header="Select"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <TabControl ItemsSource="{Binding Tabs}" ContentTemplateSelector="{StaticResource RepositorySelector}">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel LastChildFill="True">
+                        <Button Content="X" DockPanel.Dock="Right" 
+                            Command="{Binding DataContext.CloseTabCommand, RelativeSource={RelativeSource AncestorType={x:Type TabControl}}}"
+                            CommandParameter="{Binding}">
+                            <Button.Template>
+                                <ControlTemplate>
+                                    <Label FontWeight="Bold" Content="X" />
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <Label DockPanel.Dock="Left" Content="{Binding Title}"/>
+                    </DockPanel>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
 
-    </StackPanel>
+        </TabControl>
+    </DockPanel>
+    
 </Window>
