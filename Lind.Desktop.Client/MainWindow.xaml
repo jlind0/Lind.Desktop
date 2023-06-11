@@ -18,7 +18,7 @@
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
             <Button Command="{Binding OpenCustomersTabCommand}" IsEnabled="{Binding CanOpenCustomers}">
                 <DockPanel>
-                    <Image DockPanel.Dock="Left" Source="Images/Customers.png" Width="30"/>
+                    <Image DockPanel.Dock="Left" Source="/Images/Customers.png" Width="30"/>
                     <Label DockPanel.Dock="Right">Customers</Label>
                 </DockPanel>
             </Button>

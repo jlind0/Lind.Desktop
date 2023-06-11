@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\Customers.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.5" />
@@ -24,6 +28,10 @@
     <ProjectReference Include="..\Lind.Desktop.Core\Lind.Desktop.Core.csproj" />
     <ProjectReference Include="..\Lind.Example.Client.Rest\Lind.Example.Client.Rest.csproj" />
     <ProjectReference Include="..\Lind.Example.Data.Core\Lind.Example.Data.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\Customers.png" />
   </ItemGroup>
 
 </Project>
