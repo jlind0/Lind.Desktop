@@ -12,7 +12,7 @@ public partial class CustomerAddress : ExampleEntity
     public string AddressType { get; set; } = null!;
 
 
-    public virtual Address Address { get; set; } = null!;
+    public virtual Address? Address { get; set; } = null!;
 
-    public virtual Customer Customer { get; set; } = null!;
+    public virtual Customer? Customer { get; set; } = null!;
 }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net.WebSockets;
 
 namespace Lind.Example.Web.Services.Controllers
 {
@@ -23,7 +24,9 @@ namespace Lind.Example.Web.Services.Controllers
         }
         [HttpGet("results/{page}/size={pageSize}")]
         [HttpGet("results/{page}/size={pageSize}/sort={orderBy}")]
-        public async Task<RepositoryResultSet<TEntity>> Results(int page, int pageSize,string? orderBy = null, CancellationToken token = default)
+        [HttpGet("results/{page}/size={pageSize}/sort={orderBy}/props={includes}")]
+        [HttpGet("results/{page}/size={pageSize}/props={includes}")]
+        public virtual async Task<RepositoryResultSet<TEntity>> Results(int page, int pageSize,string? orderBy = null, string? includes = null, CancellationToken token = default)
         {
             
             using(var uow = Repository.CreateUnitOfWork())
@@ -48,7 +51,18 @@ namespace Lind.Example.Web.Services.Controllers
                     }
                     
                 }
-                var data = await Repository.Get(uow, pager, orderBy: orderClause, token: token);
+                List<EntityProperty> props = new List<EntityProperty>();
+                if (includes != null)
+                {
+                    foreach (var include in includes.Split(','))
+                    {
+                        var i = include.Split(':');
+                        props.Add(new EntityProperty(i[0], i[1].ToLower() == "col"));
+                    }
+                }
+                var data = await Repository.Get(uow, pager, properites: 
+                    includes != null ? props : null, 
+                    orderBy: orderClause, token: token);
                 return new RepositoryResultSet<TEntity>()
                 {
                     Entities = data,
@@ -59,30 +73,41 @@ namespace Lind.Example.Web.Services.Controllers
             }
             
         }
+        
         [HttpGet("{id}")]
-        public Task<TEntity?> Get(int id, CancellationToken token = default)
+        [HttpGet("{id}/props={includes}")]
+        public virtual Task<TEntity?> Get(int id, string? includes = null, CancellationToken token = default)
         {
-            return Repository.GetByID(new object[] { id }, token: token);
+            List<EntityProperty> props = new List<EntityProperty>();
+            if (includes != null)
+            {
+                foreach (var include in includes.Split(','))
+                {
+                    var i = include.Split(':');
+                    props.Add(new EntityProperty(i[0], i[1].ToLower() == "col"));
+                }
+            }
+            return Repository.GetByID(new object[] { id }, properites: props, token: token);
         }
         [HttpPost]
-        public async Task<TEntity> Add([FromBody] TEntity entity, CancellationToken token = default)
+        public virtual async Task<TEntity> Add([FromBody] TEntity entity, CancellationToken token = default)
         {
             await Repository.Add(entity, token: token);
             return entity;
         }
         [HttpPut]
-        public async Task<TEntity> Update([FromBody] TEntity entity, CancellationToken token = default)
+        public virtual async Task<TEntity> Update([FromBody] TEntity entity, CancellationToken token = default)
         {
             await Repository.Update(entity, token: token);
             return entity;
         }
         [HttpDelete("{id}")]
-        public Task Delete(int id, CancellationToken token = default)
+        public virtual Task Delete(int id, CancellationToken token = default)
         {
             return Repository.Delete(new object[] {id}, token: token);
         }
         [HttpDelete("many/{ids}")]
-        public async Task Delete(string ids, CancellationToken token = default)
+        public async virtual Task Delete(string ids, CancellationToken token = default)
         {
             using (var uow = Repository.CreateUnitOfWork()) 
             {
@@ -98,7 +123,42 @@ namespace Lind.Example.Web.Services.Controllers
     
     public class CustomerController : RepositoryController<Customer>
     {
-        public CustomerController(IRepository<Customer> repository) : base(repository) { }  
+        public CustomerController(IRepository<Customer> repository) : base(repository) { }
+        public override async Task<Customer?> Get(int id, string? includes = null, CancellationToken token = default)
+        {
+            var customer = await base.Get(id, includes, token);
+            if (customer != null)
+            {
+                foreach (var address in customer.CustomerAddresses)
+                {
+                    address.Customer = null;
+                    if (address.Address != null)
+                        address.Address.CustomerAddresses = null;
+                }
+            }
+            return customer;
+        }
+        public override async Task<RepositoryResultSet<Customer>> Results(int page, int pageSize, string? orderBy = null, string? includes = null, CancellationToken token = default)
+        {
+            var result = await base.Results(page, pageSize, orderBy, includes, token);
+            foreach(var cust in result.Entities)
+            {
+                foreach (var a in cust.CustomerAddresses)
+                {
+                    a.Customer = null;
+                    if (a.Address != null)
+                        a.Address.CustomerAddresses = null;
+                }
+            }
+            return result;
+        }
     }
-    
+    public class ProductController : RepositoryController<Product>
+    {
+        public ProductController(IRepository<Product> repository) : base(repository)
+        {
+        }
+        
+    }
+
 }

@@ -48,7 +48,9 @@ namespace Lind.Desktop.Core.ViewModels
         }
         public async Task OpenCustomerDetail(int customerId, CancellationToken token = default)
         {
-            var customer = await CustomersClient.Get(customerId, token);
+            var customer = await CustomersClient.Get(customerId, new EntityProperty[] 
+                { new EntityProperty("CustomerAddresses", true)}, 
+                token: token);
             Tabs.Add(new CustomerDetailTabViewModel(CustomersClient, customer));
 
         }

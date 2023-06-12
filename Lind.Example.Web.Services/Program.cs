@@ -16,6 +16,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddInMemoryTokenCaches();
 builder.Services.AddSingleton<IContextFactory>(new ContextFactory(builder.Configuration.GetConnectionString("ExampleDatabase")));
 builder.Services.AddSingleton<IRepository<Customer>, Repository<Customer>>();
+builder.Services.AddSingleton<IRepository<Product>, Repository<Product>>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

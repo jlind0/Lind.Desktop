@@ -61,7 +61,7 @@ public partial class ExampleContext : DbContext
             entity.HasIndex(e => new { e.AddressLine1, e.AddressLine2, e.City, e.StateProvince, e.PostalCode, e.CountryRegion }, "IX_Address_AddressLine1_AddressLine2_City_StateProvince_PostalCode_CountryRegion");
 
             entity.HasIndex(e => e.StateProvince, "IX_Address_StateProvince");
-
+            
             entity.Property(e => e.AddressId).HasColumnName("AddressID");
             entity.Property(e => e.AddressLine1).HasMaxLength(60);
             entity.Property(e => e.AddressLine2).HasMaxLength(60);
@@ -158,6 +158,8 @@ public partial class ExampleContext : DbContext
                 .HasForeignKey(d => d.CustomerId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
             entity.HasQueryFilter(e => !e.IsArchived);
+            entity.Navigation(e => e.Customer).AutoInclude();
+            entity.Navigation(e => e.Address).AutoInclude();
         });
 
         modelBuilder.Entity<ErrorLog>(entity =>

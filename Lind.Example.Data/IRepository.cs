@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Lind.Example.Data
 {
@@ -81,7 +82,16 @@ namespace Lind.Example.Data
         Task Add(TEntity entity, UnitOfWork? work = null,  CancellationToken token = default);
         Task Update(TEntity entity, UnitOfWork? work = null, CancellationToken token = default);
     }
-    
+    public struct EntityProperty
+    {
+        public string Name { get; }
+        public bool IsCollection { get; }
+        public EntityProperty(string name, bool isCollection = false)
+        {
+            Name = name;
+            IsCollection = isCollection;
+        }
+    }
     public interface IRepository<TEntity> : IIRepository<TEntity>
         where TEntity: ExampleEntity, new()
     {
@@ -89,12 +99,13 @@ namespace Lind.Example.Data
             Pager? page = null,
             Expression<Func<TEntity, bool>>? filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
-            IEnumerable<Expression<Func<TEntity, object>>>? properites = null,
+            IEnumerable<EntityProperty>? properites = null,
             CancellationToken token = default);
         Task<int> Count(UnitOfWork? work = null,
             Expression<Func<TEntity, bool>>? filter = null,
             CancellationToken token = default);
-        Task<TEntity?> GetByID(object[] ids, UnitOfWork? work = null, CancellationToken token = default);
+        Task<TEntity?> GetByID(object[] ids, UnitOfWork? work = null, 
+            IEnumerable<EntityProperty> ? properites = null, CancellationToken token = default);
         
     }
     public class Repository<TEntity> : IRepository<TEntity>
@@ -154,7 +165,7 @@ namespace Lind.Example.Data
             Pager? page = null, 
             Expression<Func<TEntity, bool>>? filter = null, 
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, 
-            IEnumerable<Expression<Func<TEntity, object>>>? properites = null, CancellationToken token = default)
+            IEnumerable<EntityProperty>? properites = null, CancellationToken token = default)
         {
             IEnumerable<TEntity> data = Array.Empty<TEntity>();
             bool hasWork = work != null;
@@ -171,7 +182,7 @@ namespace Lind.Example.Data
                     }
                     if (properites != null)
                     {
-                        foreach (var propExp in properites)
+                        foreach (var propExp in properites.Select(e => e.Name))
                             query = query.Include(propExp);
                     }
                     if (page != null)
@@ -197,18 +208,25 @@ namespace Lind.Example.Data
             return data;
         }
 
-        public virtual async Task<TEntity?> GetByID(object[] ids, UnitOfWork? work = null, CancellationToken token = default)
+        public virtual async Task<TEntity?> GetByID(object[] ids, UnitOfWork? work = null, IEnumerable<EntityProperty>? properites = null, CancellationToken token = default)
         {
             TEntity? entity = null;
             await Use(async (w, t) =>
             {
                 entity = await w.Context.FindAsync<TEntity>(ids, t);
-                if (entity?.IsArchived == true)
-                    entity = null;
+                if(entity != null && properites != null)
+                    foreach(var prop in properites)
+                    {
+
+                        if (prop.IsCollection)
+                            await w.Context.Entry(entity).Collection(prop.Name).LoadAsync(t);
+                        else
+                            await w.Context.Entry(entity).Reference(prop.Name).LoadAsync(t);
+                    }
             }, work, token);
             return entity;
         }
-
+         
         public virtual Task Add(TEntity entity, UnitOfWork? work = null, CancellationToken token = default)
         {
             return Use(async (w, t) =>

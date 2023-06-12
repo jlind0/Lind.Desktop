@@ -129,13 +129,17 @@ namespace Lind.Desktop.Core.ViewModels
         }
         protected abstract OrderBy[] GetSort();
         protected abstract TViewModel GetDetailViewModel(TEntity entity);
+        protected virtual IEnumerable<EntityProperty>? GetPropertiesToInclude()
+        {
+            return null;
+        }
         protected virtual async Task Load(CancellationToken token)
         {
             IsLoading = true;
             Data.Clear();
             var result = await Repository.GetAll(
                 new Pager() { Length = PageSize, Page = Page },
-                GetSort(), token);
+                GetSort(), GetPropertiesToInclude(), token);
             if (result != null)
             {
                 Count = result.Count;

@@ -42,11 +42,11 @@ namespace Lind.Example.Client.Rest
     public interface IRepositoryClient<TEntity> : IRepositoryClient
         where TEntity: ExampleEntity, new()
     {
-        Task<TEntity?> Get(int id, CancellationToken token = default);
+        Task<TEntity?> Get(int id, IEnumerable<EntityProperty>? props = null, CancellationToken token = default);
         Task<TEntity> Add(TEntity entity, CancellationToken token = default);
         Task<TEntity> Update(TEntity entity, CancellationToken token = default);
         Task<RepositoryResultSet<TEntity>?> GetAll(Pager page,
-            IEnumerable<OrderBy>? orderBy = null, CancellationToken token = default);
+            IEnumerable<OrderBy>? orderBy = null, IEnumerable<EntityProperty>? props = null, CancellationToken token = default);
     }
     public class RepositoryClient<TEntity> : IRepositoryClient<TEntity>
         where TEntity : ExampleEntity, new()
@@ -92,13 +92,15 @@ namespace Lind.Example.Client.Rest
             }
         }
 
-        public async Task<TEntity?> Get(int id, CancellationToken token = default)
+        public async Task<TEntity?> Get(int id, IEnumerable<EntityProperty>? props = null, CancellationToken token = default)
         {
             TEntity? entity = null;
             using(var client = ClientFactory.Create())
             {
                 var repositoryName = typeof(TEntity).Name.ToLower();
                 var url = $"{repositoryName}/{id}";
+                if (props != null)
+                    url += "/props=" + string.Join(",", props.Select(c => c.Name + ":"+ (c.IsCollection ? "col" : "ref")));
                 var response = await client.GetAsync(url, token);
                 if (response.IsSuccessStatusCode)
                     entity = await response.Content.ReadAsAsync<TEntity>(token);
@@ -107,7 +109,7 @@ namespace Lind.Example.Client.Rest
         }
 
         public async Task<RepositoryResultSet<TEntity>?> GetAll(Pager page, 
-            IEnumerable<OrderBy>? orderBy = null, CancellationToken token = default)
+            IEnumerable<OrderBy>? orderBy = null, IEnumerable<EntityProperty>? props = null, CancellationToken token = default)
         {
             RepositoryResultSet<TEntity>? result = null;
             using (var client = ClientFactory.Create())
@@ -116,6 +118,8 @@ namespace Lind.Example.Client.Rest
                 var url = $"{repositoryName}/results/{page.Page}/size={page.Length}";
                 if (orderBy != null)
                     url += "/sort="+string.Join(",", orderBy.Select(c => $"{c.ColumnName}:{(c.IsDsc ? "dsc" : "asc")}"));
+                if (props != null)
+                    url += "/props=" + string.Join(",", props.Select(c => c.Name + ":" + (c.IsCollection ? "col" : "ref")));
                 HttpResponseMessage response = await client.GetAsync(url, token);
                 if (response.IsSuccessStatusCode)
                 {

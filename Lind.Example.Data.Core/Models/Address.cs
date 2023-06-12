@@ -21,9 +21,9 @@ public partial class Address : ExampleEntity
 
     
 
-    public virtual ICollection<CustomerAddress> CustomerAddresses { get; set; } = new List<CustomerAddress>();
+    public virtual ICollection<CustomerAddress>? CustomerAddresses { get; set; } = new List<CustomerAddress>();
 
-    public virtual ICollection<SalesOrderHeader> SalesOrderHeaderBillToAddresses { get; set; } = new List<SalesOrderHeader>();
+    public virtual ICollection<SalesOrderHeader>? SalesOrderHeaderBillToAddresses { get; set; } = new List<SalesOrderHeader>();
 
-    public virtual ICollection<SalesOrderHeader> SalesOrderHeaderShipToAddresses { get; set; } = new List<SalesOrderHeader>();
+    public virtual ICollection<SalesOrderHeader>? SalesOrderHeaderShipToAddresses { get; set; } = new List<SalesOrderHeader>();
 }

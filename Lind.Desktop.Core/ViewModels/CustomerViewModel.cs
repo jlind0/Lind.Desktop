@@ -31,7 +31,6 @@ namespace Lind.Desktop.Core.ViewModels
         {
             return new OrderBy[] { new OrderBy() { ColumnName = "LastName" }, new OrderBy() { ColumnName = "FirstName" } };
         }
-
         protected override GridDetailCustomerViewModel GetDetailViewModel(Customer entity)
         {
             return new GridDetailCustomerViewModel(entity, Repository);
